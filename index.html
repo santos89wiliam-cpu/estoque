@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estoque Fácil - Padaria</title>
+    <style>
+        /* ========== RESET E BASE ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+        }
+
+        body {
+            background: #f0f4f8;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px;
+        }
+
+        .app-container {
+            max-width: 500px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.10);
+            padding: 24px 20px 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* ========== TELAS ========== */
+        .tela {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tela.ativa {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ========== TELA INICIAL ========== */
+        .app-header {
+            text-align: center;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #eef2f7;
+            margin-bottom: 24px;
+        }
+
+        .app-header h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #1a2b4a;
+            letter-spacing: -0.5px;
+        }
+
+        .app-header h1 span {
+            color: #2a7de1;
+        }
+
+        .app-header p {
+            font-size: 14px;
+            color: #6b7a8f;
+            margin-top: 2px;
+        }
+
+        .card-cadastro {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 20px 16px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.04);
+        }
+
+        .card-cadastro label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #2c3e50;
+            display: block;
+            margin-top: 14px;
+            margin-bottom: 4px;
+        }
+
+        .card-cadastro label:first-of-type {
+            margin-top: 0;
+        }
+
+        .campo-nome {
+            display: flex;
+            gap: 8px;
+        }
+
+        .campo-nome input {
+            flex: 1;
+        }
+
+        .btn-voz {
+            background: #eef2f7;
+            border: none;
+            border-radius: 12px;
+            width: 48px;
+            height: 48px;
+            font-size: 22px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2c3e50;
+            flex-shrink: 0;
+        }
+
+        .btn-voz:hover {
+            background: #dce3ec;
+        }
+
+        .btn-voz.ouvindo {
+            background: #2a7de1;
+            color: #fff;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid #dce3ec;
+            border-radius: 12px;
+            font-size: 15px;
+            background: #fff;
+            transition: 0.2s;
+            outline: none;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #2a7de1;
+            box-shadow: 0 0 0 3px rgba(42, 125, 225, 0.15);
+        }
+
+        .linha-dupla {
+            display: flex;
+            gap: 12px;
+        }
+
+        .linha-dupla>div {
+            flex: 1;
+        }
+
+        /* ========== BOTÕES ========== */
+        .btn {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: #2a7de1;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #1a6ac7;
+            transform: scale(0.98);
+        }
+
+        .btn-success {
+            background: #1baa6b;
+            color: #fff;
+        }
+
+        .btn-success:hover {
+            background: #15945a;
+            transform: scale(0.98);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #2c3e50;
+            border: 1.5px solid #dce3ec;
+        }
+
+        .btn-outline:hover {
+            background: #f0f4f8;
+        }
+
+        .btn-danger-outline {
+            background: transparent;
+            color: #d43f34;
+            border: 1.5px solid #f5d6d2;
+        }
+
+        .btn-danger-outline:hover {
+            background: #fdf0ee;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn-group .btn {
+            flex: 1;
+            min-width: 100px;
+        }
+
+        /* ========== TELA DE LISTA ========== */
+        .topo-lista {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .topo-lista h2 {
+            font-size: 20px;
+            color: #1a2b4a;
+        }
+
+        .topo-lista .btn-pequeno {
+            padding: 8px 16px;
+            font-size: 13px;
+            border-radius: 10px;
+            border: none;
+            background: #eef2f7;
+            cursor: pointer;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.2s;
+        }
+
+        .topo-lista .btn-pequeno:hover {
+            background: #dce3ec;
+        }
+
+        .btn-voltar {
+            background: transparent;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+
+        /* ========== LISTA DE ITENS ========== */
+        .lista-itens {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 520px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .lista-itens::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .lista-itens::-webkit-scrollbar-thumb {
+            background: #cdd6e4;
+            border-radius: 8px;
+        }
+
+        .item-card {
+            background: #f8fafc;
+            border-radius: 14px;
+            padding: 14px 16px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            transition: 0.2s;
+            border-left: 4px solid #2a7de1;
+            gap: 8px;
+        }
+
+        .item-card .info {
+            flex: 2;
+            min-width: 140px;
+        }
+
+        .item-card .info .nome {
+            font-weight: 600;
+            font-size: 16px;
+            color: #1a2b4a;
+        }
+
+        .item-card .info .detalhes {
+            font-size: 13px;
+            color: #6b7a8f;
+            margin-top: 2px;
+        }
+
+        .item-card .info .detalhes span {
+            background: #eef2f7;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-right: 6px;
+        }
+
+        .item-card .acoes {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .item-card .acoes button {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-editar {
+            background: #eef2f7;
+            color: #2c3e50;
+        }
+
+        .btn-editar:hover {
+            background: #dce3ec;
+        }
+
+        .btn-excluir {
+            background: #fdf0ee;
+            color: #d43f34;
+        }
+
+        .btn-excluir:hover {
+            background: #f5d6d2;
+        }
+
+        /* ========== MENSAGEM VAZIA ========== */
+        .vazio {
+            text-align: center;
+            padding: 40px 20px;
+            color: #8a9aa8;
+        }
+
+        .vazio span {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        /* ========== MODAL DE EDIÇÃO ========== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.40);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            padding: 20px;
+        }
+
+        .modal-overlay.aberto {
+            display: flex;
+        }
+
+        .modal {
+            background: #fff;
+            border-radius: 24px;
+            padding: 28px 24px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.20);
+            animation: fadeIn 0.25s ease;
+        }
+
+        .modal h3 {
+            font-size: 20px;
+            color: #1a2b4a;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .modal label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #2c3e50;
+            display: block;
+            margin-top: 12px;
+            margin-bottom: 4px;
+        }
+
+        .modal label:first-of-type {
+            margin-top: 0;
+        }
+
+        .modal .btn-group {
+            margin-top: 20px;
+        }
+
+        /* ========== RESPONSIVO ========== */
+        @media (max-width: 460px) {
+            .app-container {
+                padding: 16px 12px;
+                border-radius: 16px;
+            }
+            .linha-dupla {
+                flex-direction: column;
+                gap: 0;
+            }
+            .item-card {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .item-card .acoes {
+                justify-content: flex-end;
+            }
+            .btn-group .btn {
+                min-width: 80px;
+                font-size: 14px;
+            }
+            .topo-lista h2 {
+                font-size: 18px;
+            }
+        }
+
+        /* ========== TOAST ========== */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a2b4a;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.20);
+            opacity: 0;
+            transition: 0.3s;
+            pointer-events: none;
+            z-index: 9999;
+            white-space: nowrap;
+        }
+
+        .toast.visivel {
+            opacity: 1;
+            bottom: 40px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+
+        <!-- ==================== TOAST ==================== -->
+        <div id="toast" class="toast">✅ Produto salvo!</div>
+
+        <!-- ==================== TELA INICIAL ==================== -->
+        <div id="telaInicial" class="tela ativa">
+
+            <div class="app-header">
+                <h1>🧾 <span>Estoque</span>Padaria</h1>
+                <p>Controle simples e rápido</p>
+            </div>
+
+            <div class="card-cadastro">
+                <label>Nome do produto *</label>
+                <div class="campo-nome">
+                    <input type="text" id="nomeProduto" placeholder="Ex: Álcool em gel" autocomplete="off">
+                    <button id="btnVoz" class="btn-voz" title="Ditado por voz">🎤</button>
+                </div>
+
+                <label>Quantidade *</label>
+                <input type="number" id="quantidade" placeholder="0" min="0" step="1">
+
+                <label>Tipo</label>
+                <select id="tipo">
+                    <option value="Unidade">Unidade</option>
+                    <option value="Caixa">Caixa</option>
+                    <option value="Litros">Litros</option>
+                    <option value="Kg">Kg</option>
+                    <option value="Pacote">Pacote</option>
+                    <option value="Fardo">Fardo</option>
+                </select>
+
+                <label>Data</label>
+                <input type="date" id="dataProduto">
+
+                <div class="btn-group">
+                    <button class="btn btn-success" id="btnSalvar">💾 Salvar</button>
+                    <button class="btn btn-outline" id="btnLista">📋 Lista</button>
+                </div>
+            </div>
+
+            <div style="text-align:center; margin-top:16px; font-size:12px; color:#8a9aa8;">
+                Desenvolvido por Wiliam santos
+            </div>
+        </div>
+
+        <!-- ==================== TELA DE LISTA ==================== -->
+        <div id="telaLista" class="tela">
+
+            <div class="topo-lista">
+                <button class="btn-voltar" id="btnVoltar" title="Voltar">←</button>
+                <h2>📦 Estoque</h2>
+                <button class="btn-pequeno" id="btnExportarCSV">📤 CSV</button>
+            </div>
+
+            <div id="containerLista" class="lista-itens">
+                <!-- Itens serão renderizados aqui pelo JS -->
+            </div>
+
+            <div style="margin-top:16px; text-align:center; font-size:12px; color:#8a9aa8;">
+                <span id="contadorItens">0</span> itens cadastrados
+            </div>
+        </div>
+
+        <!-- ==================== MODAL EDIÇÃO ==================== -->
+        <div id="modalEdicao" class="modal-overlay">
+            <div class="modal">
+                <h3>✏️ Editar Produto</h3>
+                <label>Nome</label>
+                <input type="text" id="editNome" placeholder="Nome do produto">
+
+                <label>Quantidade</label>
+                <input type="number" id="editQuantidade" min="0" step="1">
+
+                <label>Tipo</label>
+                <select id="editTipo">
+                    <option value="Unidade">Unidade</option>
+                    <option value="Caixa">Caixa</option>
+                    <option value="Litros">Litros</option>
+                    <option value="Kg">Kg</option>
+                    <option value="Pacote">Pacote</option>
+                    <option value="Fardo">Fardo</option>
+                </select>
+
+                <div class="btn-group">
+                    <button class="btn btn-primary" id="editSalvar">💾 Salvar alterações</button>
+                    <button class="btn btn-outline" id="editCancelar">Cancelar</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // ============================================================
+        //  BANCO DE DADOS (localStorage)
+        // ============================================================
+        const STORAGE_KEY = 'estoque_padaria';
+
+        function carregarDados() {
+            const dados = localStorage.getItem(STORAGE_KEY);
+            if (dados) {
+                try { return JSON.parse(dados); } catch (e) { return []; }
+            }
+            return [];
+        }
+
+        function salvarDados(dados) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(dados));
+        }
+
+        // ============================================================
+        //  UTILITÁRIOS
+        // ============================================================
+        function hoje() {
+            return new Date().toISOString().split('T')[0];
+        }
+
+        function gerarId() {
+            return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+        }
+
+        function mostrarToast(mensagem, cor = '#1a2b4a') {
+            const toast = document.getElementById('toast');
+            toast.textContent = mensagem;
+            toast.style.background = cor;
+            toast.classList.add('visivel');
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => toast.classList.remove('visivel'), 2600);
+        }
+
+        // ============================================================
+        //  ALTERNAR TELAS
+        // ============================================================
+        function mostrarTela(id) {
+            document.querySelectorAll('.tela').forEach(el => el.classList.remove('ativa'));
+            document.getElementById(id).classList.add('ativa');
+        }
+
+        // ============================================================
+        //  RENDERIZAR LISTA
+        // ============================================================
+        function renderizarLista() {
+            const dados = carregarDados();
+            const container = document.getElementById('containerLista');
+            const contador = document.getElementById('contadorItens');
+
+            if (dados.length === 0) {
+                container.innerHTML = `
+                    <div class="vazio">
+                        <span>📭</span>
+                        <p>Nenhum produto cadastrado.<br>Volte e adicione um!</p>
+                    </div>
+                `;
+                contador.textContent = '0';
+                return;
+            }
+
+            let html = '';
+            dados.forEach((item, index) => {
+                const dataFormatada = item.data ? item.data.split('-').reverse().join('/') : '—';
+                html += `
+                    <div class="item-card" data-index="${index}">
+                        <div class="info">
+                            <div class="nome">${escapeHtml(item.nome)}</div>
+                            <div class="detalhes">
+                                <span>${item.quantidade} ${item.tipo || 'Unidade'}</span>
+                                📅 ${dataFormatada}
+                            </div>
+                        </div>
+                        <div class="acoes">
+                            <button class="btn-editar" data-id="${item.id}">✏️ Editar</button>
+                            <button class="btn-excluir" data-id="${item.id}">🗑️</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+            contador.textContent = dados.length;
+
+            // Eventos de editar
+            container.querySelectorAll('.btn-editar').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    abrirModalEdicao(id);
+                });
+            });
+
+            // Eventos de excluir
+            container.querySelectorAll('.btn-excluir').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    if (confirm('Tem certeza que deseja excluir este item?')) {
+                        excluirItem(id);
+                    }
+                });
+            });
+        }
+
+        // Proteção contra XSS
+        function escapeHtml(texto) {
+            const div = document.createElement('div');
+            div.textContent = texto;
+            return div.innerHTML;
+        }
+
+        // ============================================================
+        //  CRUD
+        // ============================================================
+        function salvarNovoItem() {
+            const nome = document.getElementById('nomeProduto').value.trim();
+            const quantidade = parseInt(document.getElementById('quantidade').value) || 0;
+            const tipo = document.getElementById('tipo').value;
+            const data = document.getElementById('dataProduto').value || hoje();
+
+            if (nome === '') {
+                mostrarToast('⚠️ Digite o nome do produto', '#d43f34');
+                return;
+            }
+
+            const dados = carregarDados();
+            dados.push({
+                id: gerarId(),
+                nome: nome,
+                quantidade: quantidade,
+                tipo: tipo,
+                data: data
+            });
+
+            salvarDados(dados);
+            mostrarToast('✅ Produto cadastrado!');
+
+            // Limpar campos
+            document.getElementById('nomeProduto').value = '';
+            document.getElementById('quantidade').value = '';
+            document.getElementById('dataProduto').value = hoje();
+            document.getElementById('nomeProduto').focus();
+
+            renderizarLista();
+        }
+
+        function excluirItem(id) {
+            let dados = carregarDados();
+            dados = dados.filter(item => item.id !== id);
+            salvarDados(dados);
+            renderizarLista();
+            mostrarToast('🗑️ Item removido');
+        }
+
+        // ============================================================
+        //  MODAL EDIÇÃO
+        // ============================================================
+        let editandoId = null;
+
+        function abrirModalEdicao(id) {
+            const dados = carregarDados();
+            const item = dados.find(i => i.id === id);
+            if (!item) return;
+
+            editandoId = id;
+            document.getElementById('editNome').value = item.nome;
+            document.getElementById('editQuantidade').value = item.quantidade;
+            document.getElementById('editTipo').value = item.tipo || 'Unidade';
+
+            document.getElementById('modalEdicao').classList.add('aberto');
+        }
+
+        function fecharModal() {
+            document.getElementById('modalEdicao').classList.remove('aberto');
+            editandoId = null;
+        }
+
+        function salvarEdicao() {
+            if (!editandoId) return;
+
+            const nome = document.getElementById('editNome').value.trim();
+            const quantidade = parseInt(document.getElementById('editQuantidade').value) || 0;
+            const tipo = document.getElementById('editTipo').value;
+
+            if (nome === '') {
+                mostrarToast('⚠️ Nome não pode ficar vazio', '#d43f34');
+                return;
+            }
+
+            let dados = carregarDados();
+            const index = dados.findIndex(i => i.id === editandoId);
+            if (index === -1) return;
+
+            dados[index].nome = nome;
+            dados[index].quantidade = quantidade;
+            dados[index].tipo = tipo;
+
+            salvarDados(dados);
+            renderizarLista();
+            fecharModal();
+            mostrarToast('✅ Alterações salvas!');
+        }
+
+        // ============================================================
+        //  EXPORTAR CSV (compatível com Excel/Planilhas Google)
+        // ============================================================
+        function exportarCSV() {
+            const dados = carregarDados();
+            if (dados.length === 0) {
+                mostrarToast('⚠️ Nenhum item para exportar', '#d43f34');
+                return;
+            }
+
+            // Cabeçalho
+            let csv = '\uFEFF'; // BOM para caracteres acentuados no Excel
+            csv += 'Nome;Quantidade;Tipo;Data\n';
+
+            dados.forEach(item => {
+                const dataFormatada = item.data ? item.data.split('-').reverse().join('/') : '—';
+                csv += `"${item.nome}";${item.quantidade};"${item.tipo || 'Unidade'}";"${dataFormatada}"\n`;
+            });
+
+            // Criar link para download
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.href = url;
+            link.download = `estoque_${hoje()}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            mostrarToast('📤 CSV exportado com sucesso!');
+        }
+
+        // ============================================================
+        //  RECONHECIMENTO DE VOZ (Web Speech API)
+        // ============================================================
+        let reconhecimento = null;
+        let ouvindo = false;
+
+        function iniciarVoz() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                mostrarToast('⚠️ Reconhecimento de voz não suportado', '#d43f34');
+                return;
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            reconhecimento = new SpeechRecognition();
+            reconhecimento.lang = 'pt-BR';
+            reconhecimento.continuous = false;
+            reconhecimento.interimResults = false;
+
+            reconhecimento.onstart = function() {
+                ouvindo = true;
+                document.getElementById('btnVoz').classList.add('ouvindo');
+                document.getElementById('btnVoz').textContent = '⏺️';
+                mostrarToast('🎤 Falar agora...', '#2a7de1');
+            };
+
+            reconhecimento.onresult = function(event) {
+                const fala = event.results[0][0].transcript.trim();
+                const input = document.getElementById('nomeProduto');
+                input.value = fala.charAt(0).toUpperCase() + fala.slice(1);
+                mostrarToast('✅ "' + input.value + '"');
+            };
+
+            reconhecimento.onerror = function(event) {
+                if (event.error === 'not-allowed') {
+                    mostrarToast('⚠️ Permita o acesso ao microfone', '#d43f34');
+                } else {
+                    mostrarToast('⚠️ Erro: ' + event.error, '#d43f34');
+                }
+                pararVoz();
+            };
+
+            reconhecimento.onend = function() {
+                pararVoz();
+            };
+
+            try {
+                reconhecimento.start();
+            } catch (e) {
+                pararVoz();
+            }
+        }
+
+        function pararVoz() {
+            ouvindo = false;
+            const btn = document.getElementById('btnVoz');
+            btn.classList.remove('ouvindo');
+            btn.textContent = '🎤';
+            if (reconhecimento) {
+                try { reconhecimento.stop(); } catch (e) {}
+            }
+        }
+
+        // ============================================================
+        //  EVENTOS
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // Data atual no campo
+            document.getElementById('dataProduto').value = hoje();
+
+            // Salvar
+            document.getElementById('btnSalvar').addEventListener('click', salvarNovoItem);
+            document.getElementById('nomeProduto').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') document.getElementById('quantidade').focus();
+            });
+            document.getElementById('quantidade').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') document.getElementById('btnSalvar').click();
+            });
+
+            // Voz
+            document.getElementById('btnVoz').addEventListener('click', function() {
+                if (ouvindo) {
+                    pararVoz();
+                } else {
+                    iniciarVoz();
+                }
+            });
+
+            // Lista
+            document.getElementById('btnLista').addEventListener('click', function() {
+                mostrarTela('telaLista');
+                renderizarLista();
+            });
+
+            // Voltar
+            document.getElementById('btnVoltar').addEventListener('click', function() {
+                mostrarTela('telaInicial');
+            });
+
+            // Exportar CSV
+            document.getElementById('btnExportarCSV').addEventListener('click', exportarCSV);
+
+            // Modal - Cancelar
+            document.getElementById('editCancelar').addEventListener('click', fecharModal);
+            document.getElementById('modalEdicao').addEventListener('click', function(e) {
+                if (e.target === this) fecharModal();
+            });
+
+            // Modal - Salvar edição
+            document.getElementById('editSalvar').addEventListener('click', salvarEdicao);
+            document.getElementById('editNome').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') document.getElementById('editQuantidade').focus();
+            });
+            document.getElementById('editQuantidade').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') document.getElementById('editSalvar').click();
+            });
+
+            // Renderizar lista inicialmente (já carrega os dados)
+            renderizarLista();
+
+            // Fechar modal com ESC
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') fecharModal();
+            });
+        });
+    </script>
+
+</body>
+</html>
